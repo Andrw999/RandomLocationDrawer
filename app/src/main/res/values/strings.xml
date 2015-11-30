@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Drawer</string>
+    <string name="title_activity_maps">RandomLocation</string>
+    <string name="title_activity_fragment_manager">FragmentManager</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_dispatcher">Dispatcher</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+</resources>
