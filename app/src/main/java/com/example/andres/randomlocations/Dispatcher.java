@@ -1,93 +1,120 @@
 package com.example.andres.randomlocations;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
-public class Dispatcher extends ActionBarActivity{
+import org.json.JSONObject;
 
-    private ListView mDrawerList;
-    private DrawerLayout mDrawerLayout;
-    private ArrayAdapter<String> mAdapter;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private String mActivityTitle;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Dispatcher extends AppCompatActivity {
+
+    public static FragmentManager fragmentManager;
+    public static final String TAG = Dispatcher.class.getSimpleName( );
+
+    private String[] options;
+    private DrawerLayout drawerLayout;
+    private ListView listView;
+    private ActionBarDrawerToggle drawerToggle;
+
+    List<JSONObject> positions = new ArrayList<>( );
+
+    public static Context context;
+
+    public static Context getAppContext() {
+        return Dispatcher.context;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dispatcher);
 
-        mDrawerList = (ListView)findViewById(R.id.navList);mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        mActivityTitle = getTitle().toString();
+        //////////PROBABLY WILL BE DELETED///////
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+        /////////////////////////////
 
-        addDrawerItems();
-        setupDrawer();
+        Dispatcher.context = getApplicationContext( );
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
-    }
+        options = new String[] { "Home", "Solicitar", "Cotizar", "Perfil"};
+        drawerLayout = (DrawerLayout)findViewById(R.id.mainContainer);
+        listView = (ListView)findViewById(R.id.leftMenu);
+        listView.setAdapter( new ArrayAdapter<String>( getActionBar().getThemedContext(),
+                android.R.layout.simple_list_item_1, options));
 
-    private void addDrawerItems() {
-        String[] osArray = { "Android", "iOS", "Windows", "OS X", "Linux" };
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
-        mDrawerList.setAdapter(mAdapter);
+        FragmentManager fragmentManager = getSupportFragmentManager( );
+        fragmentManager.beginTransaction().replace(R.id.frameContainer, new Map( ) ).commit( );
+        getSupportActionBar().setTitle(options[2]);
 
-        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(Dispatcher.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
+                Fragment fragment = null;
+                FragmentManager fragmentManager = getSupportFragmentManager( );
+
+//                if(position == 0){
+//                    fragment = new Fragmento1();
+//                    fragmentManager.beginTransaction().replace(R.id.frameContainer, fragment).commit();
+//                    getSupportActionBar().setTitle(options[position]);
+//                }
+//                if(position == 1){
+//                    fragment = new Fragmento2();
+//                    fragmentManager.beginTransaction().replace(R.id.frameContainer, fragment).commit();
+//                    getSupportActionBar().setTitle(options[position]);
+//                }
+//                if(position == 2){
+//                    fragment = new Fragmento4();
+//                    fragmentManager.beginTransaction().replace(R.id.frameContainer, fragment).commit();
+//                    getSupportActionBar().setTitle(options[position]);
+//                }
+                listView.setItemChecked(position, true);
+                drawerLayout.closeDrawer(listView);
             }
         });
-    }
 
-    private void setupDrawer() {
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+        //ACTION BAR
 
-            /** Called when a drawer has settled in a completely open state. */
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                getSupportActionBar().setTitle("Navigation!");
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+        drawerToggle = new android.support.v4.app.ActionBarDrawerToggle(this, drawerLayout, R.drawable.cubes, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                ActivityCompat.invalidateOptionsMenu(Dispatcher.this);
             }
 
-            /** Called when a drawer has settled in a completely closed state. */
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                getSupportActionBar().setTitle(mActivityTitle);
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                ActivityCompat.invalidateOptionsMenu(Dispatcher.this);
             }
         };
 
-        mDrawerToggle.setDrawerIndicatorEnabled(true);
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-    }
+        drawerLayout.setDrawerListener(drawerToggle);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        // Sync the toggle state after onRestoreInstanceState has occurred.
-        mDrawerToggle.syncState();
-    }
 
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.dispatcher, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -96,18 +123,29 @@ public class Dispatcher extends ActionBarActivity{
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        if(drawerToggle.onOptionsItemSelected(item)){
+            return  true;
+        }
 
+        int id = item.getItemId();
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
 
-        // Activate the navigation drawer toggle
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        drawerToggle.onConfigurationChanged(newConfig);
+    }
+
 }
